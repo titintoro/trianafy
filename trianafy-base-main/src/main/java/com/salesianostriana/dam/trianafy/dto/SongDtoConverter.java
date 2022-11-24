@@ -7,7 +7,7 @@ import com.salesianostriana.dam.trianafy.service.ArtistService;
 public class SongDtoConverter {
 
 
-    public Song toSong(SongResponse dto){
+    public Song toSong(SongRequest dto){
         return Song.builder()
                 .title(dto.getTitle())
                 .album(dto.getAlbum())
