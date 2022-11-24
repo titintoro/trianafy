@@ -96,8 +96,10 @@ public class SongController {
 
     @DeleteMapping("/song/{id}")
     public ResponseEntity<?> deleteSong(@PathVariable Long id) {
-        if (songRepo.existsById(id))
+        if (songRepo.existsById(id)){
             songRepo.deleteById(id);
+        }
+
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

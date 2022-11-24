@@ -147,7 +147,7 @@ public class PlaylistController {
     ) {
 
         Playlist playlist = new Playlist();
-        Song songSelected= new Song();
+        Song songSelected = new Song();
 
 
         if (playlistRepo.findById(id1).isPresent()) {
@@ -160,9 +160,7 @@ public class PlaylistController {
                     return ResponseEntity
                              .ok().body(songSelected);
                   }
-                  return ResponseEntity.notFound().build();
              }
-            return ResponseEntity.notFound().build();
         }
         return ResponseEntity.notFound().build();
     }
