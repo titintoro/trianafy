@@ -133,7 +133,9 @@ public class PlaylistController {
             m.setDescription(p.getDescription());
             playlistRepo.save(m);
             return dtoConverter.playlistToPlaylistEditResponse(m);
-        }).orElse(return ResponseEntity.notFound().build());
+        }).orElse(
+                return ResponseEntity.notFound().build();
+                )
 
     }
 
