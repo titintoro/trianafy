@@ -3,10 +3,19 @@ package com.salesianostriana.dam.trianafy.controller;
 import com.salesianostriana.dam.trianafy.dto.PlaylistDtoConverter;
 import com.salesianostriana.dam.trianafy.dto.PlaylistRequest;
 import com.salesianostriana.dam.trianafy.dto.PlaylistResponse;
+import com.salesianostriana.dam.trianafy.model.Artist;
 import com.salesianostriana.dam.trianafy.model.Playlist;
 import com.salesianostriana.dam.trianafy.model.Song;
 import com.salesianostriana.dam.trianafy.repos.PlaylistRepository;
 import com.salesianostriana.dam.trianafy.repos.SongRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +27,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "PlaylistController", description = "Playlist Controller Class")
 public class PlaylistController {
 
     private final PlaylistRepository playlistRepo;
@@ -52,6 +62,29 @@ public class PlaylistController {
     }
 
 
+    @Operation(summary = "Create a new Playlist")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201",
+                    description = "Playlist Created Successfully",
+                    content = {@Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = Artist.class)),
+                            examples = {@ExampleObject(
+                                    value = """
+                                            [
+                                                    {
+                                                        "id": 12,
+                                                        "name": "Random",
+                                                        "description": "Una lista muy loca",
+                                                        "songs": 4
+                                                    }
+                                            ]                                          
+                                            """
+                            )}
+                    )}),
+            @ApiResponse(responseCode = "400",
+                    description = "Bad Artist Creation Request",
+                    content = @Content),
+    })
     @PostMapping("/list/")
     public ResponseEntity<PlaylistRequest> create(@RequestBody PlaylistRequest playlistRequest) {
 
@@ -65,6 +98,29 @@ public class PlaylistController {
     }
 
 
+    @Operation(summary = "Update a new Playlist")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201",
+                    description = "Playlist Created Successfully",
+                    content = {@Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = Artist.class)),
+                            examples = {@ExampleObject(
+                                    value = """
+                                            [
+                                                    {
+                                                        "id": 12,
+                                                        "name": "Random",
+                                                        "description": "Una lista muy loca",
+                                                        "songs": 4
+                                                    }
+                                            ]                                          
+                                            """
+                            )}
+                    )}),
+            @ApiResponse(responseCode = "400",
+                    description = "Bad Artist Creation Request",
+                    content = @Content),
+    })
     @PutMapping("/list/{id}")
     public ResponseEntity<Playlist> edit(
             @RequestBody Playlist p,
@@ -85,8 +141,10 @@ public class PlaylistController {
 
     @DeleteMapping("/list/{id}")
     public ResponseEntity<?> deletePlaylist(@PathVariable Long id) {
-        playlistRepo.deleteById(id);
-        return ResponseEntity.noContent().build();
+        if (playlistRepo.existsById(id)){
+            playlistRepo.deleteById(id);
+        }
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
 

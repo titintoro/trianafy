@@ -7,6 +7,14 @@ import com.salesianostriana.dam.trianafy.model.Artist;
 import com.salesianostriana.dam.trianafy.model.Song;
 import com.salesianostriana.dam.trianafy.repos.ArtistRepository;
 import com.salesianostriana.dam.trianafy.repos.SongRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,35 +25,124 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "SongController", description = "Song Controller Class")
 public class SongController {
 
     private final SongRepository songRepo;
     private final ArtistRepository artistRepo;
     private final SongDtoConverter sDtoConverter;
 
+
+    @Operation(summary = "Get a list of all Songs")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Songs Found",
+                    content = {@Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = Song.class)),
+                            examples = {@ExampleObject(
+                                    value = """
+                                            [
+                                                {
+                                                    "id": 5,
+                                                    "title": "Donde habita el olvido",
+                                                    "artist": "Joaquín Sabina",
+                                                    "year": "1999",
+                                                    "album": "19 días y 500 noches"                                                                                      
+                                                },
+                                                {
+                                                    "id": 5,
+                                                    "title": "Donde habita el olvido",
+                                                    "artist": "Joaquín Sabina",
+                                                    "year": "1999",
+                                                    "album": "19 días y 500 noches"
+                                                }
+                                            ]                                          
+                                            """
+                            )}
+                    )}),
+            @ApiResponse(responseCode = "404",
+                    description = "No Songs Found",
+                    content = @Content),
+    })
     @GetMapping("/song/")
     public ResponseEntity<List<SongDtoToArtist>> findAllSongs() {
         List<Song> songsList = songRepo.findAll();
 
-        if(songsList.isEmpty()){
+        if (songsList.isEmpty()) {
             return ResponseEntity.notFound().build();
-        }else {
+        } else {
             List<SongDtoToArtist> result = songsList.stream().map(sDtoConverter::conversorPostSong).collect(Collectors.toList());
             return ResponseEntity.ok().body(result);
         }
     }
 
 
+    @Operation(summary = "Get a single Song")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Song Found",
+                    content = {@Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = Song.class)),
+                            examples = {@ExampleObject(
+                                    value = """
+                                            [
+                                                {
+                                                    "id": 4,
+                                                    "title": "19 días y 500 noches",
+                                                    "album": "19 días y 500 noches",
+                                                    "year": "1999",
+                                                    "artist": {
+                                                        "id": 1,
+                                                        "name": "Joaquín Sabina"
+                                                    }
+                                                }
+                                            ]                                          
+                                            """
+                            )}
+                    )}),
+            @ApiResponse(responseCode = "404",
+                    description = "No Song Found",
+                    content = @Content),
+    })
     @GetMapping("/song/{id}")
     public ResponseEntity<Song> findOneSong(@PathVariable Long id) {
         if (songRepo.findById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+
+        SongDtoConverter songDtoConverter = new SongDtoConverter();
+
         return ResponseEntity
-                .of(songRepo.findById(id));
+                .ok()
+                .body(songRepo.findById(id).get());
+
     }
 
 
+    @Operation(summary = "Create a new Song")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201",
+                    description = "Song Created Successfully",
+                    content = {@Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = Song.class)),
+                            examples = {@ExampleObject(
+                                    value = """
+                                            [
+                                                {
+                                                    "id": 13,
+                                                    "title": "Titi me preguntó",
+                                                    "artist": "Joaquín Sabina",
+                                                    "year": "2022",
+                                                    "album": "Un verano sin ti"
+                                                }
+                                            ]                                          
+                                            """
+                            )}
+                    )}),
+            @ApiResponse(responseCode = "400",
+                    description = "Bad Song Creation Request",
+                    content = @Content),
+    })
     @PostMapping("/song/")
     public ResponseEntity<SongDtoToArtist> addSong(@RequestBody SongRequest songRequest) {
 
@@ -68,6 +165,30 @@ public class SongController {
     }
 
 
+    @Operation(summary = "Update data of a Song")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Song Updated Successfully",
+                    content = {@Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = Song.class)),
+                            examples = {@ExampleObject(
+                                    value = """
+                                            [
+                                                {
+                                                    "id": 6,
+                                                    "title": "Safaera",
+                                                    "artist": "Joaquín Sabina",
+                                                    "year": "2022",
+                                                    "album": "19 días y 500 noches"
+                                                }
+                                            ]                                          
+                                            """
+                            )}
+                    )}),
+            @ApiResponse(responseCode = "400",
+                    description = "Bad Song Update Request",
+                    content = @Content),
+    })
     @PutMapping("/song/{id}")
     public ResponseEntity<SongDtoToArtist> editSong(@RequestBody SongRequest dto, @PathVariable Long id) {
 
@@ -94,9 +215,17 @@ public class SongController {
     }
 
 
+    @Operation(summary = "Delete a Song")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204",
+                    description = "Song Deleted Successfully",
+                    content = {@Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = Song.class))
+                    )}),
+    })
     @DeleteMapping("/song/{id}")
     public ResponseEntity<?> deleteSong(@PathVariable Long id) {
-        if (songRepo.existsById(id)){
+        if (songRepo.existsById(id)) {
             songRepo.deleteById(id);
         }
 
