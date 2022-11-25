@@ -1,8 +1,6 @@
 package com.salesianostriana.dam.trianafy.controller;
 
-import com.salesianostriana.dam.trianafy.dto.PlaylistDtoConverter;
-import com.salesianostriana.dam.trianafy.dto.PlaylistRequest;
-import com.salesianostriana.dam.trianafy.dto.PlaylistResponse;
+import com.salesianostriana.dam.trianafy.dto.*;
 import com.salesianostriana.dam.trianafy.model.Artist;
 import com.salesianostriana.dam.trianafy.model.Playlist;
 import com.salesianostriana.dam.trianafy.model.Song;
@@ -98,7 +96,7 @@ public class PlaylistController {
     }
 
 
-    @Operation(summary = "Update a new Playlist")
+    @Operation(summary = "Update a Playlist")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201",
                     description = "Playlist Created Successfully",
@@ -122,20 +120,21 @@ public class PlaylistController {
                     content = @Content),
     })
     @PutMapping("/list/{id}")
-    public ResponseEntity<Playlist> edit(
-            @RequestBody Playlist p,
+    public ResponseEntity<PlaylistEditResponse> edit(
+            @RequestBody PlaylistEditRequest p,
             @PathVariable Long id) {
+
         if (playlistRepo.findById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.of(
-                playlistRepo.findById(id).map(m -> {
-                    m.setName(p.getName());
-                    m.setDescription(p.getDescription());
-                    playlistRepo.save(m);
-                    return m;
-                })
-        );
+
+        playlistRepo.findById(id).map(m -> {
+            m.setName(p.getName());
+            m.setDescription(p.getDescription());
+            playlistRepo.save(m);
+            return dtoConverter.playlistToPlaylistEditResponse(m);
+        }).orElse(return ResponseEntity.notFound().build());
+
     }
 
 

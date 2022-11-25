@@ -31,4 +31,12 @@ public class PlaylistDtoConverter {
         result.setDescription(p.getDescription());
         return result;
     }
+
+    public PlaylistEditResponse playlistToPlaylistEditResponse(Playlist p){
+        PlaylistEditResponse result = new PlaylistEditResponse();
+        result.setId(p.getId());
+        result.setName(p.getName());
+        result.setSongs(p.getSongs().size());
+        return result;
+    }
 }
