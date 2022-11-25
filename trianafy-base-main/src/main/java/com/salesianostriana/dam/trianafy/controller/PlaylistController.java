@@ -128,14 +128,13 @@ public class PlaylistController {
             return ResponseEntity.notFound().build();
         }
 
+        return ResponseEntity.of(
         playlistRepo.findById(id).map(m -> {
             m.setName(p.getName());
             m.setDescription(p.getDescription());
             playlistRepo.save(m);
             return dtoConverter.playlistToPlaylistEditResponse(m);
-        }).orElse(
-                return ResponseEntity.notFound().build();
-                )
+        }));
 
     }
 
