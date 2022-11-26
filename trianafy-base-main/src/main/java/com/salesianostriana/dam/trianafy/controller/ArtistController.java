@@ -1,5 +1,6 @@
 package com.salesianostriana.dam.trianafy.controller;
 
+import com.salesianostriana.dam.trianafy.dto.ArtistEditRequest;
 import com.salesianostriana.dam.trianafy.model.Artist;
 import com.salesianostriana.dam.trianafy.model.Song;
 import com.salesianostriana.dam.trianafy.repos.ArtistRepository;
@@ -174,7 +175,7 @@ public class ArtistController {
                     content = @Content),
     })
     @PutMapping("/artist/{id}")
-    public ResponseEntity<Artist> edit(@RequestBody Artist e, @PathVariable Long id) {
+    public ResponseEntity<Artist> edit(@RequestBody ArtistEditRequest artistEditRequest, @PathVariable Long id) {
 
         if (artistRepository.findById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -183,7 +184,7 @@ public class ArtistController {
                 artistRepository
                         .findById(id)
                         .map(a -> {
-                            a.setName(e.getName());
+                            a.setName(artistEditRequest.getName());
                             artistRepository.save(a);
                             return a;
                         })
