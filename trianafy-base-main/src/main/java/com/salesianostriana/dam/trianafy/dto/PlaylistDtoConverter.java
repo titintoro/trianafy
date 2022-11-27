@@ -24,11 +24,19 @@ public class PlaylistDtoConverter {
         return result;
     }
 
-    public PlaylistRequest playlistToPlaylistResponseToCreatePlaylist(Playlist p) {
+    public PlaylistRequest playlistToPlaylistResponseToPlaylistRequest(Playlist p) {
         PlaylistRequest result = new PlaylistRequest();
         result.setId(p.getId());
         result.setName(p.getName());
         result.setDescription(p.getDescription());
+        return result;
+    }
+
+    public PlaylistEditResponse playlistToPlaylistEditResponse(Playlist p){
+        PlaylistEditResponse result = new PlaylistEditResponse();
+        result.setId(p.getId());
+        result.setName(p.getName());
+        result.setSongs(p.getSongs().size());
         return result;
     }
 }
