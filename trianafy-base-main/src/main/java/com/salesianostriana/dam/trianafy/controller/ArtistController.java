@@ -2,9 +2,8 @@ package com.salesianostriana.dam.trianafy.controller;
 
 import com.salesianostriana.dam.trianafy.dto.ArtistEditRequest;
 import com.salesianostriana.dam.trianafy.model.Artist;
-import com.salesianostriana.dam.trianafy.model.Song;
-import com.salesianostriana.dam.trianafy.repos.ArtistRepository;
-import com.salesianostriana.dam.trianafy.repos.SongRepository;
+import com.salesianostriana.dam.trianafy.service.ArtistService;
+import com.salesianostriana.dam.trianafy.service.SongService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,8 +24,9 @@ import java.util.List;
 @Tag(name = "ArtistController", description = "Artist Controller Class")
 public class ArtistController {
 
-    private final ArtistRepository artistRepository;
-    private final SongRepository songRepository;
+
+    private final ArtistService artistService;
+    private final SongService songService;
 
 
     @Operation(summary = "Get a single Artist")
@@ -52,10 +52,10 @@ public class ArtistController {
     })
     @GetMapping("/artist/{id}")
     public ResponseEntity<Artist> findOne(@PathVariable Long id) {
-        if (artistRepository.findById(id).isEmpty()) {
+        if (artistService.findById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.of(artistRepository.findById(id));
+        return ResponseEntity.of(artistService.findById(id));
     }
 
 
@@ -84,7 +84,7 @@ public class ArtistController {
     public ResponseEntity<Artist> create(@RequestBody Artist nuevoArtista) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(artistRepository.save(nuevoArtista));
+                .body(artistService.add(nuevoArtista));
     }
 
 
@@ -115,12 +115,12 @@ public class ArtistController {
     })
     @GetMapping("/artist/")
     public ResponseEntity<List<Artist>> findAll() {
-        if (artistRepository.findAll().isEmpty()) {
+        if (artistService.findAll().isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity
                 .ok()
-                .body(artistRepository.findAll());
+                .body(artistService.findAll());
     }
 
 
@@ -135,16 +135,16 @@ public class ArtistController {
     @DeleteMapping("/artist/{id}")
     public ResponseEntity<?> deleteArtist(@PathVariable Long id) {
 
-        if(artistRepository.findById(id).isPresent()) {
+        if(artistService.findById(id).isPresent()) {
 
-            Artist artistDeleted = artistRepository.findById(id).get();
+            Artist artistDeleted = artistService.findById(id).get();
 
-            if (artistRepository.existsById(id)){
-                songRepository.findAll()
+            if (artistService.existsById(id)){
+                songService.findAll()
                         .stream()
                         .filter(s -> s.getArtist().equals(artistDeleted))
                         .forEach(s -> s.setArtist(null));
-                artistRepository.deleteById(id);
+                artistService.deleteById(id);
             }
         }
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -177,15 +177,15 @@ public class ArtistController {
     @PutMapping("/artist/{id}")
     public ResponseEntity<Artist> edit(@RequestBody ArtistEditRequest artistEditRequest, @PathVariable Long id) {
 
-        if (artistRepository.findById(id).isEmpty()) {
+        if (artistService.findById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.of(
-                artistRepository
+                artistService
                         .findById(id)
                         .map(a -> {
                             a.setName(artistEditRequest.getName());
-                            artistRepository.save(a);
+                            artistService.edit(a);
                             return a;
                         })
         );

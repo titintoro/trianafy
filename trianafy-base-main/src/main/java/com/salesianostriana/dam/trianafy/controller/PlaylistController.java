@@ -4,8 +4,8 @@ import com.salesianostriana.dam.trianafy.dto.*;
 import com.salesianostriana.dam.trianafy.model.Artist;
 import com.salesianostriana.dam.trianafy.model.Playlist;
 import com.salesianostriana.dam.trianafy.model.Song;
-import com.salesianostriana.dam.trianafy.repos.PlaylistRepository;
-import com.salesianostriana.dam.trianafy.repos.SongRepository;
+import com.salesianostriana.dam.trianafy.service.PlaylistService;
+import com.salesianostriana.dam.trianafy.service.SongService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -28,17 +28,43 @@ import java.util.stream.Collectors;
 @Tag(name = "PlaylistController", description = "Playlist Controller Class")
 public class PlaylistController {
 
-    private final PlaylistRepository playlistRepo;
     private final PlaylistDtoConverter dtoConverter;
-    private final SongRepository sRepository;
+    private final SongService songService;
+    private final PlaylistService playlistService;
 
 
-
-
-
+    @Operation(summary = "Get a list of all Playlists")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Playlists Found",
+                    content = {@Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = List.class)),
+                            examples = {@ExampleObject(
+                                    value = """
+                                            [
+                                                 {
+                                                     "id": 13,
+                                                     "name": "Hits de Michael Jackson",
+                                                     "description": "Una lista del gran artista",
+                                                     "songs": 0
+                                                 },
+                                                 {
+                                                     "id": 17,
+                                                     "name": "Pop",
+                                                     "description": "Una lista muy divertida",
+                                                     "songs": 0
+                                                 }
+                                             ]                                          
+                                            """
+                            )}
+                    )}),
+            @ApiResponse(responseCode = "404",
+                    description = "No Playlists Found",
+                    content = @Content),
+    })
     @GetMapping("/list/")
     public ResponseEntity<List<PlaylistResponse>> findAll() {
-        List<Playlist> playlists = playlistRepo.findAll();
+        List<Playlist> playlists = playlistService.findAll();
 
         if (playlists.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -49,14 +75,37 @@ public class PlaylistController {
     }
 
 
+    @Operation(summary = "Get a single Playlist")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Playlist Found",
+                    content = {@Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = List.class)),
+                            examples = {@ExampleObject(
+                                    value = """
+                                            [
+                                                {
+                                                     "id": 13,
+                                                     "name": "Hits de Michael Jackson",
+                                                     "description": "Una lista del gran artista",
+                                                     "songs": 0
+                                                 }
+                                            ]                                          
+                                            """
+                            )}
+                    )}),
+            @ApiResponse(responseCode = "404",
+                    description = "No Playlist Found",
+                    content = @Content),
+    })
     @GetMapping("/list/{id}")
     public ResponseEntity<Playlist> findOne( @PathVariable Long id) {
-        if (playlistRepo.findById(id).isEmpty()) {
+        if (playlistService.findById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity
                 .ok()
-                .body(playlistRepo.findById(id).orElse(null));
+                .body(playlistService.findById(id).orElse(null));
     }
 
 
@@ -88,7 +137,7 @@ public class PlaylistController {
 
         Playlist newPlaylist = dtoConverter.PlaylistRequestToPlaylist(playlistRequest);
 
-        playlistRepo.save(newPlaylist);
+        playlistService.add(newPlaylist);
 
         PlaylistRequest shoPlaylistRequest = dtoConverter.playlistToPlaylistResponseToPlaylistRequest(newPlaylist);
 
@@ -124,46 +173,130 @@ public class PlaylistController {
             @RequestBody PlaylistEditRequest p,
             @PathVariable Long id) {
 
-        if (playlistRepo.findById(id).isEmpty()) {
+        if (playlistService.findById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
         return ResponseEntity.of(
-        playlistRepo.findById(id).map(m -> {
+                playlistService.findById(id).map(m -> {
             m.setName(p.getName());
             m.setDescription(p.getDescription());
-            playlistRepo.save(m);
+                    playlistService.edit(m);
             return dtoConverter.playlistToPlaylistEditResponse(m);
         }));
 
     }
 
 
+    @Operation(summary = "Delete a Playlist")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204",
+                    description = "Playlist Deleted Successfully",
+                    content = {@Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = List.class))
+                    )}),
+    })
     @DeleteMapping("/list/{id}")
     public ResponseEntity<?> deletePlaylist(@PathVariable Long id) {
-        if (playlistRepo.existsById(id)){
-            playlistRepo.deleteById(id);
+        if (playlistService.existsById(id)){
+            playlistService.deleteById(id);
         }
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
 
+    @Operation(summary = "Get a list of Songs of a Playlist")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Songs Found",
+                    content = {@Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = List.class)),
+                            examples = {@ExampleObject(
+                                    value = """
+                                            "id": 12,
+                                                      "name": "Hits de Michael Jackson",
+                                                      "description": "Una lista del gran artista",
+                                                      "songs": [
+                                                          {
+                                                              "id": 9,
+                                                              "title": "Enter Sandman",
+                                                              "album": "Metallica",
+                                                              "year": "1991",
+                                                              "artist": {
+                                                                  "id": 3,
+                                                                  "name": "Metallica"
+                                                              }
+                                                          },
+                                                          {
+                                                              "id": 8,
+                                                              "title": "Love Again",
+                                                              "album": "Future Nostalgia",
+                                                              "year": "2021",
+                                                              "artist": null
+                                                          },
+                                                          
+                                            ]                                          
+                                            """
+                            )}
+                    )}),
+            @ApiResponse(responseCode = "404",
+                    description = "No Playlist/Songs Found",
+                    content = @Content),
+    })
     @GetMapping("/list/{id}/song/")
     public ResponseEntity<Playlist> findAllSongsOfAPlaylist(@PathVariable Long id) {
-        if (playlistRepo.findById(id).isEmpty()) {
+        if (playlistService.findById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity
                 .ok()
-                .body(playlistRepo.findById(id).orElse(null));
+                .body(playlistService.findById(id).orElse(null));
     }
 
 
+    @Operation(summary = "Add a Songs to a Playlist")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Song Added Succesfully",
+                    content = {@Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = List.class)),
+                            examples = {@ExampleObject(
+                                    value = """
+                                            "id": 12,
+                                                      "name": "Hits de Michael Jackson",
+                                                      "description": "Una lista del gran artista",
+                                                      "songs": [
+                                                          {
+                                                              "id": 9,
+                                                              "title": "Enter Sandman",
+                                                              "album": "Metallica",
+                                                              "year": "1991",
+                                                              "artist": {
+                                                                  "id": 3,
+                                                                  "name": "Metallica"
+                                                              }
+                                                          },
+                                                          {
+                                                              "id": 8,
+                                                              "title": "Love Again",
+                                                              "album": "Future Nostalgia",
+                                                              "year": "2021",
+                                                              "artist": null
+                                                          },
+                                                          
+                                            ]                                          
+                                            """
+                            )}
+                    )}),
+            @ApiResponse(responseCode = "404",
+                    description = "Bad add Song to playlist request",
+                    content = @Content),
+    })
     @PostMapping("/list/{id1}/song/{id2}")
     public ResponseEntity<Playlist> addSongToPlaylist(@PathVariable Long id1, @PathVariable Long id2) {
 
-        Optional<Playlist> p = playlistRepo.findById(id1);
-        Optional<Song> s = sRepository.findById(id2);
+        Optional<Playlist> p = playlistService.findById(id1);
+        Optional<Song> s = songService.findById(id2);
 
         Playlist playlist;
         Song song;
@@ -176,7 +309,7 @@ public class PlaylistController {
         }
 
         playlist.getSongs().add(song);
-        return ResponseEntity.ok(playlistRepo.save(playlist));
+        return ResponseEntity.ok(playlistService.add(playlist));
 
     }
 
@@ -185,11 +318,11 @@ public class PlaylistController {
     public ResponseEntity<Song> DeleteOneSongFromPlaylist(@PathVariable Long id1,
                                               @PathVariable Long id2) {
 
-        if (playlistRepo.findById(id1).isPresent()) {
-            Playlist newPlaylist = playlistRepo.findById(id1).get();
-            if (sRepository.findById(id2).isPresent()){
-                newPlaylist.getSongs().remove(sRepository.findById(id2).get());
-                playlistRepo.save(newPlaylist);
+        if (playlistService.findById(id1).isPresent()) {
+            Playlist newPlaylist = playlistService.findById(id1).get();
+            if (songService.findById(id2).isPresent()){
+                newPlaylist.getSongs().remove(songService.findById(id2).get());
+                playlistService.add(newPlaylist);
                 return ResponseEntity.noContent().build();
             }
             return ResponseEntity.notFound().build();
@@ -208,11 +341,11 @@ public class PlaylistController {
         Song songSelected = new Song();
 
 
-        if (playlistRepo.findById(id1).isPresent()) {
-             playlist = playlistRepo.findById(id1).get();
+        if (playlistService.findById(id1).isPresent()) {
+             playlist = playlistService.findById(id1).get();
 
-             if (sRepository.findById(id2).isPresent()) {
-                  songSelected = sRepository.findById(id2).get();
+             if (songService.findById(id2).isPresent()) {
+                  songSelected = songService.findById(id2).get();
 
                   if ( playlist.getSongs().contains(songSelected) ) {
                     return ResponseEntity
