@@ -314,6 +314,14 @@ public class PlaylistController {
     }
 
 
+    @Operation(summary = "Delete a Song of a Playlist")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204",
+                    description = "Song Deleted from Playlist Successfully",
+                    content = {@Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = List.class))
+                    )}),
+    })
     @DeleteMapping("/list/{id1}/song/{id2}")
     public ResponseEntity<Song> DeleteOneSongFromPlaylist(@PathVariable Long id1,
                                               @PathVariable Long id2) {
@@ -331,6 +339,33 @@ public class PlaylistController {
     }
 
 
+    @Operation(summary = "Get a Song of a Playlist")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Song Found",
+                    content = {@Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = List.class)),
+                            examples = {@ExampleObject(
+                                    value = """
+                                            [
+                                                 {
+                                                      "id": 8,
+                                                      "title": "Love Again",
+                                                      "album": "Future Nostalgia",
+                                                      "year": "2021",
+                                                      "artist": {
+                                                          "id": 2,
+                                                          "name": "Dua Lipa"
+                                                      }
+                                                  }
+                                             ]                                          
+                                            """
+                            )}
+                    )}),
+            @ApiResponse(responseCode = "404",
+                    description = "No Songs Found",
+                    content = @Content),
+    })
     @GetMapping("/list/{id1}/song/{id2}")
     public ResponseEntity<Song> findOneSongInPlaylist(
             @PathVariable Long id1,
