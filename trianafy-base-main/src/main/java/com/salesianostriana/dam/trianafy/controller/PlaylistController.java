@@ -43,17 +43,26 @@ public class PlaylistController {
                                     value = """
                                             [
                                                  {
-                                                     "id": 13,
-                                                     "name": "Hits de Michael Jackson",
-                                                     "description": "Una lista del gran artista",
-                                                     "songs": 0
-                                                 },
-                                                 {
-                                                     "id": 17,
-                                                     "name": "Pop",
-                                                     "description": "Una lista muy divertida",
-                                                     "songs": 0
-                                                 }
+                                                    "id": 12,
+                                                    "name": "Random",
+                                                    "description": "Una lista muy loca",
+                                                    "songs": [
+                                                      {
+                                                        "id": 8,
+                                                        "title": "Love Again",
+                                                        "artist": "Dua Lipa",
+                                                        "year": "2021",
+                                                        "album": "Future Nostalgia"
+                                                      },
+                                                      {
+                                                        "id": 11,
+                                                        "title": "Nothing Else Matters",
+                                                        "artist": "Metallica",
+                                                        "year": "1991",
+                                                        "album": "Metallica"
+                                                      }
+                                                    ]
+                                                  }
                                              ]                                          
                                             """
                             )}
