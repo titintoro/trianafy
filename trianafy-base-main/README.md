@@ -1,5 +1,5 @@
 # TRIANAFY
-## API creda para una aplicación de música con Spring 
+## API creada para una aplicación de música con Spring 
 
 ___
 ## **Introducción**
