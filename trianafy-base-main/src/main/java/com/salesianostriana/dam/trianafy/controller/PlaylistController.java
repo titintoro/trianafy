@@ -139,7 +139,7 @@ public class PlaylistController {
 
         playlistService.add(newPlaylist);
 
-        PlaylistRequest shoPlaylistRequest = dtoConverter.playlistToPlaylistResponseToPlaylistRequest(newPlaylist);
+        PlaylistRequest shoPlaylistRequest = dtoConverter.playlistToPlaylistRequest(newPlaylist);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(shoPlaylistRequest);
     }
@@ -329,7 +329,7 @@ public class PlaylistController {
         if (playlistService.findById(id1).isPresent()) {
             Playlist newPlaylist = playlistService.findById(id1).get();
             if (songService.findById(id2).isPresent()){
-                newPlaylist.getSongs().remove(songService.findById(id2).get());
+                newPlaylist.getSongs().removeAll(songService.findById(id2).stream().toList());
                 playlistService.add(newPlaylist);
                 return ResponseEntity.noContent().build();
             }

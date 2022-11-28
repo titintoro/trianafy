@@ -24,7 +24,7 @@ public class PlaylistDtoConverter {
         return result;
     }
 
-    public PlaylistRequest playlistToPlaylistResponseToPlaylistRequest(Playlist p) {
+    public PlaylistRequest playlistToPlaylistRequest(Playlist p) {
         PlaylistRequest result = new PlaylistRequest();
         result.setId(p.getId());
         result.setName(p.getName());
