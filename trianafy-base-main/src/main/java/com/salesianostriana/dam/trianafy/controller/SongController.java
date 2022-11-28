@@ -4,8 +4,10 @@ import com.salesianostriana.dam.trianafy.dto.SongDtoConverter;
 import com.salesianostriana.dam.trianafy.dto.SongDtoToArtist;
 import com.salesianostriana.dam.trianafy.dto.SongRequest;
 import com.salesianostriana.dam.trianafy.model.Artist;
+import com.salesianostriana.dam.trianafy.model.Playlist;
 import com.salesianostriana.dam.trianafy.model.Song;
 import com.salesianostriana.dam.trianafy.service.ArtistService;
+import com.salesianostriana.dam.trianafy.service.PlaylistService;
 import com.salesianostriana.dam.trianafy.service.SongService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -32,6 +34,7 @@ public class SongController {
     private final ArtistService artistService;
     private final SongDtoConverter sDtoConverter;
 
+    private final PlaylistService playlistService;
 
     @Operation(summary = "Get a list of all Songs")
     @ApiResponses(value = {
@@ -226,6 +229,13 @@ public class SongController {
     @DeleteMapping("/song/{id}")
     public ResponseEntity<?> deleteSong(@PathVariable Long id) {
         if (songService.existsById(id)) {
+            List<Playlist> list = playlistService.findAll().stream().filter(playlist -> playlist.getSongs().contains(songService.findById(id).get())).toList();
+            list.forEach(playlist -> {
+                while (playlist.getSongs().contains(songService.findById(id).get())){
+                    playlist.deleteSong(songService.findById(id).get());
+                }
+                playlistService.edit(playlist);
+            });
             songService.deleteById(id);
         }
 
