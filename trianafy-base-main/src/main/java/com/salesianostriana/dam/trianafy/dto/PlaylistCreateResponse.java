@@ -1,15 +1,20 @@
 package com.salesianostriana.dam.trianafy.dto;
 
 import com.salesianostriana.dam.trianafy.model.Song;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+@Builder
 public class PlaylistCreateResponse {
     @Id
     @GeneratedValue
@@ -19,7 +24,5 @@ public class PlaylistCreateResponse {
 
     private String description;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @Builder.Default
-    private List<SongResponse> songs = new ArrayList<>();
+    private List<SongDtoToArtist> songs = new ArrayList<>();
 }

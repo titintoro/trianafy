@@ -1,11 +1,16 @@
 package com.salesianostriana.dam.trianafy.dto;
 
 import com.salesianostriana.dam.trianafy.model.Playlist;
+import com.salesianostriana.dam.trianafy.model.Song;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class PlaylistDtoConverter {
 
+    final SongDtoConverter songDtoConverter = new SongDtoConverter();
     public Playlist PlaylistRequestToPlaylist(PlaylistRequest p) {
         return Playlist.builder()
                 .name(p.getName())
@@ -14,6 +19,21 @@ public class PlaylistDtoConverter {
                 .build();
     }
 
+    public PlaylistCreateResponse playlistToPlaylistCreateResponse(Playlist playlist){
+
+        List<SongDtoToArtist> songResponseList = new ArrayList<>();
+
+       for(Song s: playlist.getSongs()){
+          songResponseList.add(songDtoConverter.conversorPostSong(s)) ;
+       }
+
+        PlaylistCreateResponse playlistCreateResponse = new PlaylistCreateResponse();
+        playlistCreateResponse.setDescription(playlist.getDescription());
+        playlistCreateResponse.setSongs(songResponseList);
+        playlistCreateResponse.setId(playlist.getId());
+        playlistCreateResponse.setName(playlist.getName());
+        return playlistCreateResponse;
+    }
     public PlaylistResponse playlistToPlaylistResponse(Playlist p) {
         int nSongs = p.getSongs().size();
         PlaylistResponse result = new PlaylistResponse();

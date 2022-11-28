@@ -99,13 +99,15 @@ public class PlaylistController {
                     content = @Content),
     })
     @GetMapping("/list/{id}")
-    public ResponseEntity<Playlist> findOne( @PathVariable Long id) {
+    public ResponseEntity<PlaylistCreateResponse> findOne( @PathVariable Long id) {
         if (playlistService.findById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+
+        Playlist playlist = playlistService.findById(id).orElse(null);
         return ResponseEntity
                 .ok()
-                .body(playlistService.findById(id).orElse(null));
+                .body(dtoConverter.playlistToPlaylistCreateResponse(playlist));
     }
 
 
@@ -139,9 +141,9 @@ public class PlaylistController {
 
         playlistService.add(newPlaylist);
 
-        PlaylistRequest shoPlaylistRequest = dtoConverter.playlistToPlaylistRequest(newPlaylist);
+        PlaylistRequest showPlaylistRequest = dtoConverter.playlistToPlaylistRequest(newPlaylist);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(shoPlaylistRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(showPlaylistRequest);
     }
 
 
@@ -244,13 +246,14 @@ public class PlaylistController {
                     content = @Content),
     })
     @GetMapping("/list/{id}/song/")
-    public ResponseEntity<Playlist> findAllSongsOfAPlaylist(@PathVariable Long id) {
+    public ResponseEntity<PlaylistCreateResponse> findAllSongsOfAPlaylist(@PathVariable Long id) {
         if (playlistService.findById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+        Playlist playlist = playlistService.findById(id).orElse(null);
         return ResponseEntity
                 .ok()
-                .body(playlistService.findById(id).orElse(null));
+                .body(dtoConverter.playlistToPlaylistCreateResponse(playlist));
     }
 
 
@@ -293,7 +296,7 @@ public class PlaylistController {
                     content = @Content),
     })
     @PostMapping("/list/{id1}/song/{id2}")
-    public ResponseEntity<Playlist> addSongToPlaylist(@PathVariable Long id1, @PathVariable Long id2) {
+    public ResponseEntity<PlaylistCreateResponse> addSongToPlaylist(@PathVariable Long id1, @PathVariable Long id2) {
 
         Optional<Playlist> p = playlistService.findById(id1);
         Optional<Song> s = songService.findById(id2);
@@ -309,7 +312,10 @@ public class PlaylistController {
         }
 
         playlist.getSongs().add(song);
-        return ResponseEntity.ok(playlistService.add(playlist));
+        Playlist playlistResponse = playlistService.findById(id1).orElse(null);
+        return ResponseEntity
+                .ok()
+                .body(dtoConverter.playlistToPlaylistCreateResponse(playlistResponse));
 
     }
 
