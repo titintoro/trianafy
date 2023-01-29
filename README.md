@@ -37,7 +37,7 @@ Se pueden realizar las siguientes funcionalidades:
 
 Para realizar este proyecto hemos utilizado:
 
-1. [Crso de Desarrollo de una API Rest con Spring Boot](https://openwebinars.net/academia/aprende/api-rest-spring-boot/)
+1. [Curso de Desarrollo de una API Rest con Spring Boot](https://openwebinars.net/academia/aprende/api-rest-spring-boot/)
 2. [Como generar un web service con spring boot](https://openwebinars.net/academia/aprende/generar-web-service-spring-boot-2020/)
 4. [Explicaciones y ejemplos presenciales]
 
